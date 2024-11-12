@@ -127,7 +127,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3Nodes\Node.cpp" />
+    <ClCompile Include="3Nodes\NodeContent.cpp" />
+    <ClCompile Include="3Nodes\NodeMap.cpp" />
+    <ClCompile Include="3Nodes\Vector2.cpp" />
     <ClCompile Include="AA2.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="3Nodes\Node.h" />
+    <ClInclude Include="3Nodes\NodeContent.h" />
+    <ClInclude Include="3Nodes\NodeMap.h" />
+    <ClInclude Include="3Nodes\Vector2.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
