@@ -1,44 +1,36 @@
 #pragma once
+#include "Nodes.h"
 #include <vector>
-#include <functional> //funcions autoregulades tancades
+#include <functional>
 #include <mutex>
 #include <list>
-
-#include "Node.h"
-
-
 class NodeMap
 {
 public:
-	//fem...
-	typedef std::vector<Node*> NodeColumn; //la fila original
-	typedef std::vector<NodeColumn*> NodeGrid; //les columnes (tindrà valors per copia)
+	typedef std::vector<Node*> NodeColumn;
+	typedef std::vector<NodeColumn> NodeGrid;
 
 	typedef std::function<void(Node* node)> SafePick;
-										//agafem grups de nodes per bloquejarlos (com totes les caselles de serp, o àrea d'efecte) 
-										// i evitar que altres intentin modificar-los també mentre nosaltres modifiquem
-	typedef std::function<void(std::list<Node*> nodes)> SafeMultiPick; //una list perque pot estar de sordenada
-
+	typedef std::function<void(std::list<Node*> nodes)>SaveMultiPick;
 private:
 	Vector2 _offset;
 
 	Vector2 _size;
-	std::mutex _sizeMutex; //teoria diu que no és necessari, però ho és, hem de protegir
+	std::mutex _sizeMutex;
 	
 	NodeGrid _grid;
 	std::mutex _gridMutex;
 
-	std::mutex _safeMultiNodeLockMutex;
-
-	Node* UnSafeGetNode(Vector2 position);
-
+	std::mutex _saveMultiNodeLockMutex;
+	
+	Node* UnsaveGetNode(Vector2 position);
 public:
-
 	NodeMap(Vector2 size, Vector2 offset);
 
-	void UnSafeDraw();
-	void SafePickNode(Vector2 position, SafePick safePickAction); //no donem possibilitat a equivorase peruqe rebem només node i acció sobre aquest
-	void SafeMultiPickNode(std::list<Vector2> positions, SafeMultiPick safeMultiPickAction);
 	Vector2 GetSize();
+
+	void UnsaveDraw();
+	void SafePickNode(Vector2 position, SafePick safePickAction);
+	void SafeMultiPickNode(std::list<Vector2> positions, SaveMultiPick safeMultiPickAction);
 };
 
