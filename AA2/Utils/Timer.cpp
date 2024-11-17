@@ -41,7 +41,6 @@ void Timer::StartLoopTimer(unsigned long timeRequiredMilisecons, OnTimeElapsedWi
 			Sleep(timeRequiredMilisecons);
 			continueLoop = onTimeElapse();
 		}
-
 	});
 
 	thread->detach();
