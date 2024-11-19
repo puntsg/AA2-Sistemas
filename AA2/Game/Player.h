@@ -1,7 +1,9 @@
 #pragma once
-#include "../3Nodes/INodeContent.h" 
+#include "../3Nodes/Nodes.h" 
 class Player :
-    public INodeContent
+    public Node
 {
+public:
+    Player(Vector2 pos);
 };
 

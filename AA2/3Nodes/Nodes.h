@@ -8,7 +8,10 @@ private:
 	Vector2 _position; 
 	INodeContent* _content = nullptr;
 	std::mutex _classMutex;
+protected:
+	char icon;
 public:
+	Node() {} /// !!!!!!!!!!!!!!!!!!
 	Node(Vector2 position);
 	INodeContent* GetnodeContent();
 
@@ -17,7 +20,7 @@ public:
 		T* contentCasted = dynamic_cast<T*>(_content);
 		return contentCasted;
 	}
-	void SetContent(INodeContent* nodeContent);
+	void SetContent(INodeContent* nodeContent, char newIcon); // !!!!!!!!!!!!!!!!!!!!!!!!!!!
 	void DrawContent(Vector2 offset);
 	void Lock();
 	void Unlock();

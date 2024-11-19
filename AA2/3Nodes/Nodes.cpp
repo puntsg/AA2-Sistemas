@@ -4,6 +4,7 @@
 Node::Node(Vector2 position)
 {
 	_position = position;
+	icon = ' ';
 }
 
 INodeContent* Node::GetnodeContent()
@@ -11,9 +12,10 @@ INodeContent* Node::GetnodeContent()
 	return _content;
 }
 
-void Node::SetContent(INodeContent* nodeContent)
+void Node::SetContent(INodeContent* nodeContent, char newIcon)
 {
 	_content = nodeContent;
+	icon = newIcon;
 }
 
 void Node::DrawContent(Vector2 offset)
@@ -22,7 +24,7 @@ void Node::DrawContent(Vector2 offset)
 		Vector2 pos = offset + _position;
 		CC::Lock();
 		CC::SetPosition(pos.x, pos.y);
-		std::cout << " ";
+		std::cout << icon;
 		CC::Unlock();
 		return;
 	}
