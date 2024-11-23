@@ -17,7 +17,7 @@ Game::Game()
     }
 */
     map.UnsaveDraw();
-    timer->StartLoopTimer(1000, [this]() {
+    timer->StartLoopTimer(5000, [this]() {
         //DataSaver::Instance().SaveData();
         return true;
     });

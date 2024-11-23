@@ -136,19 +136,26 @@
     <ClCompile Include="3Nodes\Nodes.cpp" />
     <ClCompile Include="3Nodes\Vector2.cpp" />
     <ClCompile Include="AA2.cpp" />
+    <ClCompile Include="Game\Enemy.cpp" />
+    <ClCompile Include="Game\Character.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Game\DataSaver.cpp" />
     <ClCompile Include="dist\jsoncpp.cpp" />
     <ClCompile Include="Game\Player.cpp" />
     <ClCompile Include="InputSystem\InputSystem.cpp" />
+    <ClCompile Include="Game\Sword.cpp" />
+    <ClCompile Include="Game\Polearm.cpp" />
     <ClCompile Include="Utils\ConsoleControl.cpp" />
     <ClCompile Include="Utils\Timer.cpp" />
+    <ClCompile Include="Game\Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3Nodes\INodeContent.h" />
     <ClInclude Include="3Nodes\NodeMap.h" />
     <ClInclude Include="3Nodes\Nodes.h" />
     <ClInclude Include="3Nodes\Vector2.h" />
+    <ClInclude Include="Game\Enemy.h" />
+    <ClInclude Include="Game\Character.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Game\DataSaver.h" />
     <ClInclude Include="dist\json\json-forwards.h" />
@@ -165,8 +172,11 @@
     <ClInclude Include="include\json\writer.h" />
     <ClInclude Include="Game\Player.h" />
     <ClInclude Include="InputSystem\InputSystem.h" />
+    <ClInclude Include="Game\Sword.h" />
+    <ClInclude Include="Game\Polearm.h" />
     <ClInclude Include="Utils\ConsoleControl.h" />
     <ClInclude Include="Utils\Timer.h" />
+    <ClInclude Include="Game\Weapon.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="include\CMakeLists.txt" />
