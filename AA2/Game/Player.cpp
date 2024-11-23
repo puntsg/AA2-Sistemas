@@ -1,5 +1,6 @@
 #include "Player.h"
 Player::Player(Vector2 pos) {
+	position = pos;
 	icon = 'P';
 	coins = 0;
 	lifes = 0;
