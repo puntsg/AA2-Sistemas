@@ -1,7 +1,7 @@
 #include "Player.h"
 Player::Player(Vector2 pos) {
 	position = pos;
-	icon = 'P';
+	icon = 'J';
 	coins = 0;
 	lifes = 0;
 	potions = 0;

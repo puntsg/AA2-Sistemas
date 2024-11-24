@@ -11,9 +11,12 @@ class Game
 {
 public:
 	Game();
+	void GameUpdate();
+	void PrintMapAndHud();
 private :
+	bool canAttackMove = true;
 	Timer* timer;
-	NodeMap*** map;
+	NodeMap* map;
 	Player* player;
 	InputSystem* is;
 };
