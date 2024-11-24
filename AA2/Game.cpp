@@ -19,14 +19,52 @@ Game::Game()
     map.UnsaveDraw();
     player->DrawContent(player->position);
     is = new InputSystem();
-    InputSystem::KeyBinding* kb = is->KeyAddListener(K_1, [this]() {
-        player->Move(Vector2(-1,-1));
-        player->DrawContent(player->position);
-    });
+    
+    //In case of pressing D
+    InputSystem::KeyBinding* kb1 = is->KeyAddListener(K_D, [this]() {
+        if ((player->position + Vector2(1,0)).x < Vector2(10, 6).x)
+        
+            player->Move(Vector2(1,0));
+        });
+    
+    // pressing S
+    InputSystem::KeyBinding* kb2 = is->KeyAddListener(K_S, [this]() {
+        if ((player->position + Vector2(0, 1)).y < Vector2(10, 6).y)
+            player->Move(Vector2(0, 1));
+        });
+
+    //In case of pressing A
+    InputSystem::KeyBinding* kb3 = is->KeyAddListener(K_A, [this]() {
+        if ((player->position + Vector2(-1, 0)).x >= 0)
+
+        player->Move(Vector2(-1, 0));
+        });
+
+    // pressing W
+    InputSystem::KeyBinding* kb4 = is->KeyAddListener(K_W, [this]() {
+        if ((player->position + Vector2(0, -1)).y >= 0)
+        player->Move(Vector2(0, -1));
+        });
+
+    //In case of pressing 
+    /*InputSystem::KeyBinding* kb = is->KeyAddListener(K_1, [this]() {
+        if ((player->position + Vector2(1, 1)).x < Vector2(10, 6).x &&
+        (player->position + Vector2(1, 1)).y < Vector2(10, 6).y)
+            player->Move(Vector2(1, 1));
+        });*/
+
+    //Timer for saving files
     timer->StartLoopTimer(5000, [this]() {
         //DataSaver::Instance().SaveData();
         return true;
     });
+
+    //Paint map then player
+    timer->StartLoopTimer(100, [this, &map]() {
+        map.UnsaveDraw();
+        player->DrawContent(player->position);
+        return true;
+        });
     is->StartListen();
     while (true)
     {
