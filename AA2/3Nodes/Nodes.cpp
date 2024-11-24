@@ -20,15 +20,15 @@ void Node::SetContent(INodeContent* nodeContent, char newIcon)
 
 void Node::DrawContent(Vector2 offset)
 {
-	if(_content == nullptr){
+	//if(_content == nullptr){
 		Vector2 pos = offset + _position;
 		CC::Lock();
 		CC::SetPosition(pos.x, pos.y);
 		std::cout << icon;
 		CC::Unlock();
 		return;
-	}
-	_content->Draw(offset);
+	//}
+	//_content->Draw(offset);
 }
 
 void Node::Lock()

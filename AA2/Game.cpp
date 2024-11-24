@@ -1,13 +1,19 @@
 #include "Game.h"
 #include "Game/DataSaver.h"
 #include "Utils/ConsoleControl.h"
+/*
+Lo que está mal, es que player o character, ninguno de ellos debe ser un Node.
+Solo debe ser iNodeContent, y implementar la función draw.
+Despues, una vez tienes el puntero del nodo donde quieres que este, solo tienes que usar la función del node de setContent.
 
+Porque lo que tienes que hacer no es cambiar el nodo, si no el contenido de dentro del nodo.
+*/
 Game::Game()
 {
     map = new NodeMap(Vector2(ZONE_WIDTH, ZONE_HEIGHT), Vector2(0, 0));
     player = new Player(Vector2(1,1));
     map->SafePickNode(player->position, [this](Node* node) {
-        node = player;
+        node->SetContent(player, 'J');
     });
     is = new InputSystem();   
     //WASD movement

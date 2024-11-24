@@ -1,7 +1,8 @@
 #include "Player.h"
+#include <iostream>
 Player::Player(Vector2 pos) {
 	position = pos;
-	icon = 'J';
+	
 	coins = 0;
 	lifes = 0;
 	potions = 0;
@@ -9,6 +10,7 @@ Player::Player(Vector2 pos) {
 
 void Player::Draw(Vector2 offset)
 {
+	std::cout << 'J';
 }
 
 void Player::Decode(Json::Value json)
