@@ -7,5 +7,6 @@ class Character :
 public:
     Vector2 position;
     inline char GetIcon() const { return this->icon; }
+    void Move(Vector2 dir);
 };
 

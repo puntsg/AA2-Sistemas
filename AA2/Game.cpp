@@ -1,6 +1,5 @@
 #include "Game.h"
 #include "Game/DataSaver.h"
-#include "Game/Player.h"
 #include "Utils/ConsoleControl.h"
 
 Game::Game()
@@ -8,7 +7,7 @@ Game::Game()
 
 
     NodeMap map(Vector2(10, 6), Vector2(0, 0));
-    Player* player = new Player(Vector2(1,5));
+    player = new Player(Vector2(0,0));
     /*map = new NodeMap * *[VERTICAL_MAP_ZONES];
     for (int i = 0; i < VERTICAL_MAP_ZONES; i++) {
         map[i] = new NodeMap * [HORIZONTAL_MAP_ZONES];
@@ -18,14 +17,19 @@ Game::Game()
     }
 */
     map.UnsaveDraw();
-    CC::Lock();
-    CC::SetPosition(player->position.x,player->position.y);
-    std::cout << player->GetIcon();
-    //CC::FillWithCharacter(player->GetIcon(),CC::BLACK,CC::WHITE);
-    CC::Unlock();
-    
+    player->DrawContent(player->position);
+    is = new InputSystem();
+    InputSystem::KeyBinding* kb = is->KeyAddListener(K_1, [this]() {
+        player->Move(Vector2(-1,-1));
+        player->DrawContent(player->position);
+    });
     timer->StartLoopTimer(5000, [this]() {
         //DataSaver::Instance().SaveData();
         return true;
     });
+    is->StartListen();
+    while (true)
+    {
+
+    }
 }
