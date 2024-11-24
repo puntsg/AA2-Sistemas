@@ -1,6 +1,7 @@
 #include "Game.h"
 #include "Game/DataSaver.h"
 #include "Utils/ConsoleControl.h"
+
 /*
 Lo que está mal, es que player o character, ninguno de ellos debe ser un Node.
 Solo debe ser iNodeContent, y implementar la función draw.
@@ -10,48 +11,35 @@ Porque lo que tienes que hacer no es cambiar el nodo, si no el contenido de dent
 */
 Game::Game()
 {
-    map = new NodeMap(Vector2(ZONE_WIDTH, ZONE_HEIGHT), Vector2(0, 0));
+    map = new NodeMap(Vector2(ZONE_WIDTH+2, ZONE_HEIGHT+2), Vector2(0, 0));
+    for (int i = 0; i < ZONE_WIDTH + 2; i++) {
+        for (int j = 0; j < ZONE_HEIGHT + 2; j++) {
+            if (i == 0 || i == ZONE_WIDTH + 1 ||   j == 0 || j == ZONE_HEIGHT +1 ) {
+                map->SafePickNode(Vector2(i, j), [this](Node* node) {
+                    node->SetContent(new Wall(), '#');
+                    node->DrawContent(Vector2(0, 0));
+                });
+            }
+        }
+    }
     player = new Player(Vector2(1,1));
     map->SafePickNode(player->position, [this](Node* node) {
         node->SetContent(player, 'J');
+        node->DrawContent(player->position);
     });
     is = new InputSystem();   
     //WASD movement
     InputSystem::KeyBinding* kb1 = is->KeyAddListener(K_D, [this]() {
-        if (((player->position + Vector2(1, 0)).x < Vector2(10, 6).x) && canAttackMove) {
-            player->Move(Vector2(1, 0));
-            canAttackMove = false;
-            timer->StartTimer(1000, [this]() {
-                canAttackMove = true;
-            });
-        }
+        MovePlayer(EDirection::RIGHT);
     });
     InputSystem::KeyBinding* kb2 = is->KeyAddListener(K_S, [this]() {
-        if (((player->position + Vector2(0, 1)).y < Vector2(10, 6).y) && canAttackMove){
-            player->Move(Vector2(0, 1));
-            canAttackMove = false; 
-            timer->StartTimer(1000, [this]() {
-                canAttackMove = true;
-            });
-        }
+        MovePlayer(EDirection::DOWN);
     });
     InputSystem::KeyBinding* kb3 = is->KeyAddListener(K_A, [this]() {
-        if (((player->position + Vector2(-1, 0)).x >= 0) && canAttackMove) {
-            player->Move(Vector2(-1, 0));
-            canAttackMove = false;
-            timer->StartTimer(1000, [this]() {
-                canAttackMove = true;
-            });
-        }
+        MovePlayer(EDirection::LEFT);
     });
     InputSystem::KeyBinding* kb4 = is->KeyAddListener(K_W, [this]() {
-        if (((player->position + Vector2(0, -1)).y >= 0) && canAttackMove) {
-            player->Move(Vector2(0, -1));
-            canAttackMove = false;
-            timer->StartTimer(1000, [this]() {
-                canAttackMove = true;
-            });
-        }
+        MovePlayer(EDirection::UP);
     });
     //Healing
     InputSystem::KeyBinding* kb5 = is->KeyAddListener(K_0, [this]() {
@@ -84,4 +72,41 @@ void Game::PrintMapAndHud()
     map->UnsaveDraw();
     std::cout << "\nMonedas:" << player->coins << std::endl;
     std::cout << "\nPociones:" << player->potions << std::endl;
+}
+
+void Game::MovePlayer(EDirection dir)
+{
+    if (canAttackMove) {
+
+        canAttackMove = false;
+        map->SafePickNode(player->position, [this](Node* node) {
+            node->SetContent(nullptr, '_');
+            node->DrawContent(Vector2(0, 0));
+            });
+        switch (dir)
+        {
+        case Game::UP:
+            player->position.y--;
+            break;
+        case Game::DOWN:
+            player->position.y++;
+            break;
+        case Game::LEFT:
+            player->position.x--;
+            break;
+        case Game::RIGHT:
+            player->position.x++;
+            break;
+        default:
+            break;
+        }
+        map->SafePickNode(player->position, [this](Node* node) {
+            node->SetContent(player, 'J');
+            node->DrawContent(Vector2(0, 0));
+            });
+
+        timer->StartTimer(1000, [this]() {
+            canAttackMove = true;
+            });
+    }
 }
