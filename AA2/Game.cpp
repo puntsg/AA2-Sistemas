@@ -85,7 +85,9 @@ void Game::PrintMapAndHud()
 {
     currentMap->UnsaveDraw();
     std::cout << "\nMonedas:" << player->coins << std::endl;
-    std::cout << "\nPociones:" << player->potions << std::endl;
+    std::cout << "Vidas:" << player->potions << std::endl;
+    std::cout << "Pociones:" << player->potions << std::endl;
+    std::cout << "Weapon";
 }
 
 void Game::ChangeMapZone(EDirection dir)
