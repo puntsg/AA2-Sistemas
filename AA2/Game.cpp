@@ -3,37 +3,41 @@
 #include "Game/Portal.h"
 #include "Utils/ConsoleControl.h"
 
-/*
-Lo que está mal, es que player o character, ninguno de ellos debe ser un Node.
-Solo debe ser iNodeContent, y implementar la función draw.
-Despues, una vez tienes el puntero del nodo donde quieres que este, solo tienes que usar la función del node de setContent.
+Game::Game(){
+    for (int i = 0; i < HORIZONTAL_MAP_ZONES; i++) {
+        for (int j = 0; j < VERTICAL_MAP_ZONES; j++) {
+            currentMap = new NodeMap(Vector2(ZONE_WIDTH + 2, ZONE_HEIGHT + 2), Vector2(0, 0));
+            for (int k = 0; k < ZONE_WIDTH + 2; k++) {
+                for (int l = 0; l < ZONE_HEIGHT + 2; l++) {
+                    if (k == 0 || k == ZONE_WIDTH + 1 || l == 0 || l == ZONE_HEIGHT + 1) {
 
-Porque lo que tienes que hacer no es cambiar el nodo, si no el contenido de dentro del nodo.
-*/
-Game::Game()
-{
-    map = new NodeMap(Vector2(ZONE_WIDTH+2, ZONE_HEIGHT+2), Vector2(0, 0));
-    for (int i = 0; i < ZONE_WIDTH + 2; i++) {
-        for (int j = 0; j < ZONE_HEIGHT + 2; j++) {
-            if (i == 0 || i == ZONE_WIDTH + 1 ||   j == 0 || j == ZONE_HEIGHT +1 ) {
-                if ((i == ZONE_WIDTH / 2 && j == 0) || (i == ZONE_WIDTH / 2 && j == ZONE_HEIGHT + 1) ||
-                    (i == 0 && j == ZONE_HEIGHT / 2) || (i == ZONE_WIDTH + 1 && j == ZONE_HEIGHT / 2)) {
-                    map->SafePickNode(Vector2(i, j), [this](Node* node) {
-                        node->SetContent(new Portal(), 'P');
-                        node->DrawContent(Vector2(0, 0));
-                    });
-                }
-                else {
-                    map->SafePickNode(Vector2(i, j), [this](Node* node) {
-                        node->SetContent(new Wall(), '#');
-                        node->DrawContent(Vector2(0, 0));
-                    });
+                        if (((k == ZONE_WIDTH / 2 && l == 0) && (j!=0) )||
+                            ((k == ZONE_WIDTH / 2 && l == ZONE_HEIGHT + 1) && (j!=VERTICAL_MAP_ZONES-1)) ||
+                            ((k == 0 && l == ZONE_HEIGHT / 2) &&  (i!=0)) ||
+                            ((k == ZONE_WIDTH + 1 && l == ZONE_HEIGHT / 2) && (i!= HORIZONTAL_MAP_ZONES-1))) 
+                        {
+                            currentMap->SafePickNode(Vector2(k, l), [this](Node* node) {
+                                node->SetContent(new Portal(), 'P');
+                                node->DrawContent(Vector2(0, 0));
+                                });
+                        }
+                        else {
+                            currentMap->SafePickNode(Vector2(k, l), [this](Node* node) {
+                                node->SetContent(new Wall(), '#');
+                                node->DrawContent(Vector2(0, 0));
+                                });
+                        }
+                    }
                 }
             }
+            maps[i][j] = currentMap;
         }
     }
-    player = new Player(Vector2(1,1));
-    map->SafePickNode(player->position, [this](Node* node) {
+    currentHorizontalZone = HORIZONTAL_MAP_ZONES/2;
+    currentVerticalZone = VERTICAL_MAP_ZONES / 2;
+    currentMap = maps[currentHorizontalZone][currentVerticalZone];
+    player = new Player(Vector2(ZONE_WIDTH/2,ZONE_HEIGHT/2));
+    currentMap->SafePickNode(player->position, [this](Node* node) {
         node->SetContent(player, 'J');
         node->DrawContent(player->position);
     });
@@ -79,9 +83,34 @@ void Game::GameUpdate()
 
 void Game::PrintMapAndHud()
 {
-    map->UnsaveDraw();
+    currentMap->UnsaveDraw();
     std::cout << "\nMonedas:" << player->coins << std::endl;
     std::cout << "\nPociones:" << player->potions << std::endl;
+}
+
+void Game::ChangeMapZone(EDirection dir)
+{
+    switch (dir)
+    {
+    case EDirection::UP:
+        player->position.y = ZONE_HEIGHT;
+        currentVerticalZone--;
+        break;
+    case EDirection::DOWN:
+        player->position.y = 1;
+        currentVerticalZone++;
+        break;
+    case EDirection::LEFT:
+        player->position.x = ZONE_WIDTH;
+        currentHorizontalZone--;
+        break;
+    case EDirection::RIGHT:
+        player->position.x = 1;
+        currentHorizontalZone++;
+        break;
+    }
+    currentMap = maps[currentHorizontalZone][currentVerticalZone];
+    PrintMapAndHud();
 }
 
 void Game::MovePlayer(EDirection dir)
@@ -89,51 +118,48 @@ void Game::MovePlayer(EDirection dir)
     if (canAttackMove) {
 
         canAttackMove = false;
-        map->SafePickNode(player->position, [this](Node* node) {
+        currentMap->SafePickNode(player->position, [this](Node* node) {
             node->SetContent(nullptr, '_');
             node->DrawContent(Vector2(0, 0));
             });
         switch (dir)
         {
-        case Game::UP:
-            map->SafePickNode(Vector2(player->position.x, player->position.y -1), [this](Node* node) {
+        case EDirection::UP:
+            currentMap->SafePickNode(Vector2(player->position.x, player->position.y -1), [this](Node* node) {
                 if (node->GetnodeContent() == nullptr)
                     player->position.y--;
-                else if (node->GetnodeContent() == new Portal()) 
-                    std::cout << "----------------------------------------------teleport";
+                else if (dynamic_cast<Portal*>(node->GetnodeContent()))
+                    ChangeMapZone(EDirection::UP);
             }); 
             
             break;
-        case Game::DOWN:
-            map->SafePickNode(Vector2(player->position.x, player->position.y + 1), [this](Node* node) {
+        case EDirection::DOWN:
+            currentMap->SafePickNode(Vector2(player->position.x, player->position.y + 1), [this](Node* node) {
                 if (node->GetnodeContent() == nullptr)
-                player->position.y++;
-                else if (node->GetnodeContent() == new Portal())
-                    std::cout << "----------------------------------------------teleport";
+                    player->position.y++;
+                else if (dynamic_cast<Portal*>(node->GetnodeContent()))
+                    ChangeMapZone(EDirection::DOWN);
             });
             
             break;
-        case Game::LEFT:
-            map->SafePickNode(Vector2(player->position.x - 1, player->position.y), [this](Node* node) {
+        case EDirection::LEFT:
+            currentMap->SafePickNode(Vector2(player->position.x - 1, player->position.y), [this](Node* node) {
                 if (node->GetnodeContent() == nullptr)
                     player->position.x--;
-                else if (node->GetnodeContent() == new Portal())
-                    std::cout << "----------------------------------------------teleport";
+                else if (dynamic_cast<Portal*>(node->GetnodeContent()))
+                    ChangeMapZone(EDirection::LEFT);
             });
             break;
-        case Game::RIGHT:
-            map->SafePickNode(Vector2(player->position.x + 1, player->position.y), [this](Node* node) {
+        case EDirection::RIGHT:
+            currentMap->SafePickNode(Vector2(player->position.x + 1, player->position.y), [this](Node* node) {
                 if (node->GetnodeContent() == nullptr)
                     player->position.x++;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent())) 
-                    std::cout << "----------------------------------------------teleport";
-                });
-            
-            break;
-        default:
+                    ChangeMapZone(EDirection::RIGHT);
+            });
             break;
         }
-        map->SafePickNode(player->position, [this](Node* node) {
+        currentMap->SafePickNode(player->position, [this](Node* node) {
             node->SetContent(player, 'J');
             node->DrawContent(Vector2(0, 0));
             });

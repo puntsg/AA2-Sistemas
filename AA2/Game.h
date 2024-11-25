@@ -6,25 +6,29 @@
 #include "InputSystem/InputSystem.h"
 #define VERTICAL_MAP_ZONES 3
 #define HORIZONTAL_MAP_ZONES 3
-#define ZONE_WIDTH 10
-#define ZONE_HEIGHT 10
-class Game
-{
-	enum EDirection{
+#define ZONE_WIDTH 16
+#define ZONE_HEIGHT 9
+enum EDirection{
 		UP,
 		DOWN,
 		LEFT,
 		RIGHT
-	};
+};
+class Game
+{
+	
 public:
 	Game();
 	void GameUpdate();
 	void PrintMapAndHud();
 private :
+	void ChangeMapZone(EDirection dir);
 	void MovePlayer(EDirection dir);
 	bool canAttackMove = true;
+	int currentVerticalZone, currentHorizontalZone;
 	Timer* timer;
-	NodeMap* map;
+	NodeMap* maps[VERTICAL_MAP_ZONES][HORIZONTAL_MAP_ZONES] ;
+	NodeMap* currentMap;
 	Player* player;
 	InputSystem* is;
 };
