@@ -145,6 +145,7 @@
     <ClCompile Include="InputSystem\InputSystem.cpp" />
     <ClCompile Include="Game\Sword.cpp" />
     <ClCompile Include="Game\Polearm.cpp" />
+    <ClCompile Include="Game\Portal.cpp" />
     <ClCompile Include="Utils\ConsoleControl.cpp" />
     <ClCompile Include="Utils\Timer.cpp" />
     <ClCompile Include="Game\Weapon.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="InputSystem\InputSystem.h" />
     <ClInclude Include="Game\Sword.h" />
     <ClInclude Include="Game\Polearm.h" />
+    <ClInclude Include="Game\Portal.h" />
     <ClInclude Include="Utils\ConsoleControl.h" />
     <ClInclude Include="Utils\Timer.h" />
     <ClInclude Include="Game\Weapon.h" />
