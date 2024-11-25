@@ -15,6 +15,7 @@ public:
     void Decode(Json::Value json);
     Json::Value Encode();
     static Player* FromJson(Json::Value json);
-
+    void Heal();
+    void Hurt();
 };
 

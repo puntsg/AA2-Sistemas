@@ -27,3 +27,18 @@ Player* Player::FromJson(Json::Value json)
 {
 	return nullptr;
 }
+
+void Player::Heal()
+{
+	if (potions > 0 && lifes <= 2) {
+		this->lifes++;
+		this->potions--;
+	}
+}
+
+void Player::Hurt()
+{
+	lifes--;
+	if (lifes == 0)
+		abort();
+}
