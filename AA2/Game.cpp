@@ -93,7 +93,7 @@ Game::Game(){
             currentMap->SafePickNode(allEnemies.back()->position, [this](Node* node) {
                 node->SetContent(allEnemies.back(), 'E');
                 node->DrawContent(Vector2(0, 0));
-                });
+            });
             _enemyMutex.unlock();
         }
         else {
@@ -146,7 +146,9 @@ void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
     case EDirection::UP:
         currentMap->SafePickNode(Vector2(enemy->position.x, enemy->position.y - 1), [this, enemy](Node* node) {
             if (node->GetnodeContent() == nullptr)
-            enemy->position.y--;
+                enemy->position.y--;
+            else if (node->GetnodeContent() == dynamic_cast<Player*>(node->GetnodeContent()))
+                player->Hurt();
             
             });
 
@@ -154,22 +156,27 @@ void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
     case EDirection::DOWN:
         currentMap->SafePickNode(Vector2(enemy->position.x, enemy->position.y + 1), [this, enemy](Node* node) {
             if (node->GetnodeContent() == nullptr)
-            enemy->position.y++;
-            
+                enemy->position.y++;
+            else if (node->GetnodeContent() == dynamic_cast<Player*>(node->GetnodeContent()))
+                player->Hurt();
             });
 
         break;
     case EDirection::LEFT:
         currentMap->SafePickNode(Vector2(enemy->position.x - 1, enemy->position.y), [this, enemy](Node* node) {
             if (node->GetnodeContent() == nullptr)
-            enemy->position.x--;
+                enemy->position.x--;
+            else if (node->GetnodeContent() == dynamic_cast<Player*>(node->GetnodeContent()))
+                player->Hurt();
             
             });
         break;
     case EDirection::RIGHT:
         currentMap->SafePickNode(Vector2(enemy->position.x + 1, enemy->position.y), [this, enemy](Node* node) {
             if (node->GetnodeContent() == nullptr)
-            enemy->position.x++;
+                enemy->position.x++;
+            else if (node->GetnodeContent() == dynamic_cast<Player*>(node->GetnodeContent()))
+                player->Hurt();
             
             });
         break;
