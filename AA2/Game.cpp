@@ -85,10 +85,11 @@ Game::Game(){
         int which = rand() % 11;
         
         if (which > 5) {
-            Enemy* newEnemy = new Enemy(Vector2(2, 2));
+            Enemy* newEnemy = new Enemy(Vector2(1 + (rand() % (ZONE_WIDTH - 1)), 1 + (rand() % (ZONE_HEIGHT - 1))),
+                LeftCenterRight(currentHorizontalZone), UpCenterDown(currentVerticalZone));
             allEnemies.push_back(newEnemy);
 
-            currentMap->SafePickNode(Vector2(2, 2), [this](Node* node) {
+            currentMap->SafePickNode(allEnemies.back()->position, [this](Node* node) {
                 node->SetContent(allEnemies.back(), 'E');
             node->DrawContent(Vector2(0, 0));
                 });
@@ -108,13 +109,7 @@ Game::Game(){
     });
 
 
-    Enemy* newEnemy = new Enemy(Vector2(2, 2));
-    allEnemies.push_back(newEnemy);
-
-    currentMap->SafePickNode(Vector2(2, 2), [this](Node* node) {
-        node->SetContent(allEnemies.back(), 'E');
-        node->DrawContent(Vector2(0, 0));
-    });
+    
     PrintMapAndHud();
 }
 
@@ -122,20 +117,27 @@ void Game::MoveEnemies() {
 
     for (Enemy* oneEnemy : allEnemies)
     {
-        if (oneEnemy->iCanMove == true)
+        if (oneEnemy != nullptr)
         {
-            MoveEnemy(EDirection(rand() % 4), oneEnemy);
-            oneEnemy->DoneActing();
+            if (oneEnemy->iCanMove == true)
+            {
+                MoveEnemy(EDirection(rand() % 4), oneEnemy);
+                oneEnemy->DoneActing();
+            }
         }
     }
 }
 
 void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
 
-    currentMap->SafePickNode(enemy->position, [this](Node* node) {
-        node->SetContent(nullptr, '_');
-    node->DrawContent(Vector2(0, 0));
+    if (int(enemy->xArea) == int(currentHorizontalZone) && int(enemy->yArea) == int(currentVerticalZone))
+    {
+        currentMap->SafePickNode(enemy->position, [this](Node* node) {
+            node->SetContent(nullptr, '_');
+            node->DrawContent(Vector2(0, 0));
         });
+    }
+    
     switch (dir)
     {
     case EDirection::UP:
@@ -169,10 +171,13 @@ void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
             });
         break;
     }
-    currentMap->SafePickNode(enemy->position, [this, enemy](Node* node) {
+
+    if (int(enemy->xArea) == int(currentHorizontalZone) && int(enemy->yArea) == int(currentVerticalZone)) {
+        currentMap->SafePickNode(enemy->position, [this, enemy](Node* node) {
         node->SetContent(enemy, 'E');
         node->DrawContent(Vector2(0, 0));
-    });
+        });
+    }
 }
 
 void Game::GameUpdate()
