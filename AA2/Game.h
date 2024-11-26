@@ -37,5 +37,6 @@ private :
 	NodeMap* currentMap;
 	Player* player;
 	InputSystem* is;
+	std::mutex _enemyMutex;
 };
 

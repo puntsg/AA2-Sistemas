@@ -85,14 +85,16 @@ Game::Game(){
         int which = rand() % 11;
         
         if (which > 5) {
+            _enemyMutex.lock();
             Enemy* newEnemy = new Enemy(Vector2(1 + (rand() % (ZONE_WIDTH - 1)), 1 + (rand() % (ZONE_HEIGHT - 1))),
                 LeftCenterRight(currentHorizontalZone), UpCenterDown(currentVerticalZone));
             allEnemies.push_back(newEnemy);
 
             currentMap->SafePickNode(allEnemies.back()->position, [this](Node* node) {
                 node->SetContent(allEnemies.back(), 'E');
-            node->DrawContent(Vector2(0, 0));
+                node->DrawContent(Vector2(0, 0));
                 });
+            _enemyMutex.unlock();
         }
         else {
         
@@ -114,7 +116,7 @@ Game::Game(){
 }
 
 void Game::MoveEnemies() {
-
+    _enemyMutex.lock(); 
     for (Enemy* oneEnemy : allEnemies)
     {
         if (oneEnemy != nullptr)
@@ -126,6 +128,7 @@ void Game::MoveEnemies() {
             }
         }
     }
+    _enemyMutex.unlock();
 }
 
 void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
