@@ -4,6 +4,8 @@
 #include "Utils/ConsoleControl.h"
 
 Game::Game(){
+    srand(time(NULL));
+
     for (int i = 0; i < HORIZONTAL_MAP_ZONES; i++) {
         for (int j = 0; j < VERTICAL_MAP_ZONES; j++) {
             currentMap = new NodeMap(Vector2(ZONE_WIDTH + 2, ZONE_HEIGHT + 2), Vector2(0, 0));
@@ -72,7 +74,105 @@ Game::Game(){
         return true;
     });
 
+    //Timer for moving enemies 
+    timer->StartLoopTimer(1000, [this]() {
+        MoveEnemies();
+        return true;
+        });
+
+    //Timer for spawing enemies or chests
+    timer->StartLoopTimer(1000, [this]() {
+        int which = rand() % 11;
+        
+        if (which > 5) {
+            Enemy* newEnemy = new Enemy(Vector2(2, 2));
+            allEnemies.push_back(newEnemy);
+
+            currentMap->SafePickNode(Vector2(2, 2), [this](Node* node) {
+                node->SetContent(allEnemies.back(), 'E');
+            node->DrawContent(Vector2(0, 0));
+                });
+        }
+        else {
+        
+            Chest* newChest = new Chest(Vector2(1 + (rand() % (ZONE_WIDTH -1)), 1 + (rand() % (ZONE_HEIGHT -1))));
+            allchests.push_back(newChest);
+
+            currentMap->SafePickNode(allchests.back()->position, [this](Node* node) {
+                node->SetContent(allchests.back(), 'C');
+                node->DrawContent(Vector2(0,0));
+            });
+        }
+        
+        return true;
+    });
+
+
+    Enemy* newEnemy = new Enemy(Vector2(2, 2));
+    allEnemies.push_back(newEnemy);
+
+    currentMap->SafePickNode(Vector2(2, 2), [this](Node* node) {
+        node->SetContent(allEnemies.back(), 'E');
+        node->DrawContent(Vector2(0, 0));
+    });
     PrintMapAndHud();
+}
+
+void Game::MoveEnemies() {
+
+    for (Enemy* oneEnemy : allEnemies)
+    {
+        if (oneEnemy->iCanMove == true)
+        {
+            MoveEnemy(EDirection(rand() % 4), oneEnemy);
+            oneEnemy->DoneActing();
+        }
+    }
+}
+
+void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
+
+    currentMap->SafePickNode(enemy->position, [this](Node* node) {
+        node->SetContent(nullptr, '_');
+    node->DrawContent(Vector2(0, 0));
+        });
+    switch (dir)
+    {
+    case EDirection::UP:
+        currentMap->SafePickNode(Vector2(enemy->position.x, enemy->position.y - 1), [this, enemy](Node* node) {
+            if (node->GetnodeContent() == nullptr)
+            enemy->position.y--;
+            
+            });
+
+        break;
+    case EDirection::DOWN:
+        currentMap->SafePickNode(Vector2(enemy->position.x, enemy->position.y + 1), [this, enemy](Node* node) {
+            if (node->GetnodeContent() == nullptr)
+            enemy->position.y++;
+            
+            });
+
+        break;
+    case EDirection::LEFT:
+        currentMap->SafePickNode(Vector2(enemy->position.x - 1, enemy->position.y), [this, enemy](Node* node) {
+            if (node->GetnodeContent() == nullptr)
+            enemy->position.x--;
+            
+            });
+        break;
+    case EDirection::RIGHT:
+        currentMap->SafePickNode(Vector2(enemy->position.x + 1, enemy->position.y), [this, enemy](Node* node) {
+            if (node->GetnodeContent() == nullptr)
+            enemy->position.x++;
+            
+            });
+        break;
+    }
+    currentMap->SafePickNode(enemy->position, [this, enemy](Node* node) {
+        node->SetContent(enemy, 'E');
+        node->DrawContent(Vector2(0, 0));
+    });
 }
 
 void Game::GameUpdate()
