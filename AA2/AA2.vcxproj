@@ -137,6 +137,7 @@
     <ClCompile Include="3Nodes\Vector2.cpp" />
     <ClCompile Include="AA2.cpp" />
     <ClCompile Include="Game\Chest.cpp" />
+    <ClCompile Include="Game\Collectable.cpp" />
     <ClCompile Include="Game\Enemy.cpp" />
     <ClCompile Include="Game\Character.cpp" />
     <ClCompile Include="Game.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="3Nodes\Nodes.h" />
     <ClInclude Include="3Nodes\Vector2.h" />
     <ClInclude Include="Game\Chest.h" />
+    <ClInclude Include="Game\Collectable.h" />
     <ClInclude Include="Game\Enemy.h" />
     <ClInclude Include="Game\Character.h" />
     <ClInclude Include="Game.h" />
