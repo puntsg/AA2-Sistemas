@@ -3,6 +3,8 @@
 #include "Game/Portal.h"
 #include "Utils/ConsoleControl.h"
 
+#define MIN_DIST 2
+
 Game::Game(){
     srand(time(NULL));
 
@@ -38,7 +40,8 @@ Game::Game(){
     currentHorizontalZone = HORIZONTAL_MAP_ZONES/2;
     currentVerticalZone = VERTICAL_MAP_ZONES / 2;
     currentMap = maps[currentHorizontalZone][currentVerticalZone];
-    player = new Player(Vector2(ZONE_WIDTH/2,ZONE_HEIGHT/2));
+    //player = new Player(Vector2(ZONE_WIDTH/2,ZONE_HEIGHT/2));
+    player = new Player(Vector2(3,4));
     currentMap->SafePickNode(player->position, [this](Node* node) {
         node->SetContent(player, 'J');
         node->DrawContent(player->position);
@@ -82,11 +85,23 @@ Game::Game(){
 
     //Timer for spawing enemies or chests
     timer->StartLoopTimer(1000, [this]() {
-        int which = rand() % 11;
         
+        //Randomize enemy or chest generation and position
+        int which = rand() % 11;
+        Vector2 randomPos;
+
+        do
+        {
+            randomPos.x = 1 + (rand() % (ZONE_WIDTH - 1));
+        } while (MIN_DIST > abs(player->position.x - randomPos.x));
+        do
+        {
+            randomPos.y = 1 + (rand() % (ZONE_HEIGHT - 1));
+        } while (MIN_DIST > abs(player->position.y - randomPos.y));
+
         if (which > 5) {
             _enemyMutex.lock();
-            Enemy* newEnemy = new Enemy(Vector2(1 + (rand() % (ZONE_WIDTH - 1)), 1 + (rand() % (ZONE_HEIGHT - 1))),
+            Enemy* newEnemy = new Enemy(randomPos,
                 LeftCenterRight(currentHorizontalZone), UpCenterDown(currentVerticalZone));
             allEnemies.push_back(newEnemy);
 
@@ -98,7 +113,7 @@ Game::Game(){
         }
         else {
         
-            Chest* newChest = new Chest(Vector2(1 + (rand() % (ZONE_WIDTH -1)), 1 + (rand() % (ZONE_HEIGHT -1))));
+            Chest* newChest = new Chest(randomPos);
             allchests.push_back(newChest);
 
             currentMap->SafePickNode(allchests.back()->position, [this](Node* node) {
@@ -272,7 +287,25 @@ void Game::MovePlayer(EDirection dir)
                 if (node->GetnodeContent() == nullptr)
                     player->position.x++;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent())) 
-                    ChangeMapZone(EDirection::RIGHT);
+                    ChangeMapZone(EDirection::RIGHT);   
+                /*else if (dynamic_cast<Enemy*>(node->GetnodeContent())) {
+                    //_enemyMutex.lock();
+                    for (int i = 0; i < allEnemies.size(); i++) {
+                        if (allEnemies[i] == node->GetnodeContent())
+                        {
+
+                            //currentMap->SafePickNode(Vector2(player->position.x + 1, player->position.y),
+                                //[this](Node* node) {
+                                    //node->SetContent(nullptr, '_');
+                                    //node->DrawContent(Vector2(0, 0));
+                                //});
+
+                            allEnemies.erase(allEnemies.begin() + i);
+
+                        }
+                    }
+                    //_enemyMutex.unlock();
+                }*/
             });
             break;
         }
