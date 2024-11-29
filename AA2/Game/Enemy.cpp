@@ -12,11 +12,14 @@ Enemy::Enemy(Vector2 pos, LeftCenterRight _xArea, UpCenterDown _yArea)
 	yArea = _yArea;
 
 	WaitForNextActionLoop();
+
+	icon = 'E';
+
 }
 
 void Enemy::Draw(Vector2 offset)
 {
-	std::cout << 'E';
+	std::cout << icon;
 }
 
 void Enemy::Kill()

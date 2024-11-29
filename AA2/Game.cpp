@@ -2,10 +2,18 @@
 #include "Game/DataSaver.h"
 #include "Game/Portal.h"
 #include "Utils/ConsoleControl.h"
+#include <fstream>
 
 Game::Game(){
     srand(time(NULL));
+    std::cout << 
+        "1: load game\n" <<
+        "other: newgame\n" <<
+        "option: ";
+    char option;
+    std::cin >> option;
 
+    //Creació mapa
     for (int i = 0; i < HORIZONTAL_MAP_ZONES; i++) {
         for (int j = 0; j < VERTICAL_MAP_ZONES; j++) {
             currentMap = new NodeMap(Vector2(ZONE_WIDTH + 2, ZONE_HEIGHT + 2), Vector2(0, 0));
@@ -35,14 +43,21 @@ Game::Game(){
             maps[i][j] = currentMap;
         }
     }
-    currentHorizontalZone = HORIZONTAL_MAP_ZONES/2;
-    currentVerticalZone = VERTICAL_MAP_ZONES / 2;
-    currentMap = maps[currentHorizontalZone][currentVerticalZone];
-    player = new Player(Vector2(ZONE_WIDTH/2,ZONE_HEIGHT/2));
-    currentMap->SafePickNode(player->position, [this](Node* node) {
-        node->SetContent(player, 'J');
-        node->DrawContent(player->position);
-    });
+    
+    if (option == '1') {
+        currentHorizontalZone = HORIZONTAL_MAP_ZONES / 2;
+        currentVerticalZone = VERTICAL_MAP_ZONES / 2;
+        currentMap = maps[currentHorizontalZone][currentVerticalZone];
+        player = new Player(Vector2(ZONE_WIDTH / 2, ZONE_HEIGHT / 2));
+        currentMap->SafePickNode(player->position, [this](Node* node) {
+            node->SetContent(player, 'J');
+            node->DrawContent(player->position);
+            });
+    }
+    else {
+        //Carregar
+    }
+
     is = new InputSystem();   
     //WASD movement
     InputSystem::KeyBinding* kb1 = is->KeyAddListener(K_D, [this]() {
@@ -57,6 +72,7 @@ Game::Game(){
     InputSystem::KeyBinding* kb4 = is->KeyAddListener(K_W, [this]() {
         MovePlayer(EDirection::UP);
     });
+
     //Healing
     InputSystem::KeyBinding* kb5 = is->KeyAddListener(K_0, [this]() {
         if ((player->potions > 0) && canAttackMove) {
@@ -68,9 +84,10 @@ Game::Game(){
             });
         }
     });
+
     //Timer for saving files
     timer->StartLoopTimer(5000, [this]() {
-        //DataSaver::Instance().SaveData();
+        SaveData();
         return true;
     });
 
@@ -109,9 +126,6 @@ Game::Game(){
         
         return true;
     });
-
-
-    
     PrintMapAndHud();
 }
 
@@ -184,10 +198,40 @@ void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
 
     if (int(enemy->xArea) == int(currentHorizontalZone) && int(enemy->yArea) == int(currentVerticalZone)) {
         currentMap->SafePickNode(enemy->position, [this, enemy](Node* node) {
-        node->SetContent(enemy, 'E');
-        node->DrawContent(Vector2(0, 0));
+        //node->SetContent(enemy, node->GetnodeContent()->GetIcon());
+            //node->SetContent(enemy, node->GetnodeContent()->icon);
+            node->SetContent(enemy, 'E');
+            node->DrawContent(Vector2(0, 0));
         });
     }
+}
+
+void Game::SaveData()
+{
+    std::ofstream mapFile;
+    mapFile.open("map.txt");
+    std::string mapString = "";
+    saveMutex.lock();
+    for (int i = 0; i < HORIZONTAL_MAP_ZONES; i++) {
+        for (int j = 0; j < VERTICAL_MAP_ZONES; j++) {
+            currentMap = maps[i][j];
+            for (int k = 0; k < ZONE_WIDTH + 2; k++) {
+                for (int l = 0; l < ZONE_HEIGHT + 2; l++) {
+                    currentMap->SafePickNode(Vector2(k, l), [this,&mapString](Node* node) {
+                        if(node->GetnodeContent() == nullptr)
+                            mapString += " ";
+                        else
+                            mapString += node->GetnodeContent()->icon;
+                     });
+                }
+                mapString += "\n";
+            }
+            mapString += "\n";
+        }
+    }
+   saveMutex.unlock();
+    mapFile << mapString;
+    mapFile.close();
 }
 
 void Game::GameUpdate()
@@ -236,7 +280,7 @@ void Game::MovePlayer(EDirection dir)
 
         canAttackMove = false;
         currentMap->SafePickNode(player->position, [this](Node* node) {
-            node->SetContent(nullptr, '_');
+            node->SetContent(nullptr,'_');
             node->DrawContent(Vector2(0, 0));
             });
         switch (dir)
@@ -277,7 +321,7 @@ void Game::MovePlayer(EDirection dir)
             break;
         }
         currentMap->SafePickNode(player->position, [this](Node* node) {
-            node->SetContent(player, 'J');
+            node->SetContent(player, player->icon);
             node->DrawContent(Vector2(0, 0));
             });
 

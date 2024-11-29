@@ -30,6 +30,8 @@ private :
 	void MovePlayer(EDirection dir);
 	void MoveEnemies();
 	void MoveEnemy(EDirection dir, Enemy* enemy);
+	void SaveData();
+	void LoadData();
 	bool canAttackMove = true;
 	int currentVerticalZone, currentHorizontalZone;
 	Timer* timer;
@@ -38,5 +40,6 @@ private :
 	Player* player;
 	InputSystem* is;
 	std::mutex _enemyMutex;
+	std::mutex saveMutex;
 };
 

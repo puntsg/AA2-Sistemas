@@ -6,7 +6,7 @@ class Portal
 	: public Character
 {
 public:
-	Portal();
+	Portal() { icon = 'P'; };
 
 	void Draw(Vector2 offset) override;
 

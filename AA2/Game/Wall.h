@@ -4,6 +4,6 @@ class Wall:
 	public INodeContent
 {
 public:
-	Wall(){}
+	Wall() { icon = '#'; }
 	void Draw(Vector2 offset)override{}
 };

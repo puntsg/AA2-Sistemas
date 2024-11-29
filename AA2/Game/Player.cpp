@@ -2,15 +2,15 @@
 #include <iostream>
 Player::Player(Vector2 pos) {
 	position = pos;
-	
 	coins = 0;
 	lifes = 0;
 	potions = 0;
+	icon = 'J';
 }
 
 void Player::Draw(Vector2 offset)
 {
-	std::cout << 'J';
+	std::cout << this->icon;
 }
 
 void Player::Decode(Json::Value json)

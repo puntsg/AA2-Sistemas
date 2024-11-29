@@ -3,10 +3,9 @@
 class Character :
     public INodeContent
 {
-    virtual void Draw(Vector2 offset) = 0;
 public:
+    virtual void Draw(Vector2 offset) = 0;
     Vector2 position;
-    inline char GetIcon() const;
     void Move(Vector2 dir);
 };
 
