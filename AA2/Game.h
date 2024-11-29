@@ -29,6 +29,7 @@ private :
 	void ChangeMapZone(EDirection dir);
 	void MovePlayer(EDirection dir);
 	void MoveEnemies();
+	void CheckIfEnemiesDead();
 	void MoveEnemy(EDirection dir, Enemy* enemy);
 	bool canAttackMove = true;
 	int currentVerticalZone, currentHorizontalZone;

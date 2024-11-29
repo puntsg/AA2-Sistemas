@@ -77,8 +77,9 @@ Game::Game(){
         return true;
     });
 
-    //Timer for moving enemies 
+    //Timer for cheching on enemies 
     timer->StartLoopTimer(1000, [this]() {
+        CheckIfEnemiesDead();
         MoveEnemies();
         return true;
         });
@@ -99,6 +100,7 @@ Game::Game(){
             randomPos.y = 1 + (rand() % (ZONE_HEIGHT - 1));
         } while (MIN_DIST > abs(player->position.y - randomPos.y));
 
+        //Enemy or chest generation
         if (which > 5) {
             _enemyMutex.lock();
             Enemy* newEnemy = new Enemy(randomPos,
@@ -128,6 +130,24 @@ Game::Game(){
 
     
     PrintMapAndHud();
+}
+
+void Game::CheckIfEnemiesDead() {
+    _enemyMutex.lock();
+
+    for (int i = 0; i < allEnemies.size(); i++)
+    {
+        if (allEnemies[i]->IsDead())
+        {
+            currentMap->SafePickNode(allEnemies[i]->position, [this](Node* node) {
+                node->SetContent(nullptr, '_');
+                node->DrawContent(Vector2(0, 0));
+            });
+
+            allEnemies.erase(allEnemies.begin() + i);
+        }
+    }
+    _enemyMutex.unlock();
 }
 
 void Game::MoveEnemies() {
@@ -257,11 +277,15 @@ void Game::MovePlayer(EDirection dir)
         switch (dir)
         {
         case EDirection::UP:
-            currentMap->SafePickNode(Vector2(player->position.x, player->position.y -1), [this](Node* node) {
+            currentMap->SafePickNode(Vector2(player->position.x, player->position.y - 1), [this](Node* node) {
                 if (node->GetnodeContent() == nullptr)
-                    player->position.y--;
+                player->position.y--;
+            
                 else if (dynamic_cast<Portal*>(node->GetnodeContent()))
                     ChangeMapZone(EDirection::UP);
+
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();                                  
             }); 
             
             break;
@@ -271,6 +295,9 @@ void Game::MovePlayer(EDirection dir)
                     player->position.y++;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent()))
                     ChangeMapZone(EDirection::DOWN);
+
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
             });
             
             break;
@@ -280,6 +307,9 @@ void Game::MovePlayer(EDirection dir)
                     player->position.x--;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent()))
                     ChangeMapZone(EDirection::LEFT);
+
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
             });
             break;
         case EDirection::RIGHT:
@@ -288,24 +318,9 @@ void Game::MovePlayer(EDirection dir)
                     player->position.x++;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent())) 
                     ChangeMapZone(EDirection::RIGHT);   
-                /*else if (dynamic_cast<Enemy*>(node->GetnodeContent())) {
-                    //_enemyMutex.lock();
-                    for (int i = 0; i < allEnemies.size(); i++) {
-                        if (allEnemies[i] == node->GetnodeContent())
-                        {
-
-                            //currentMap->SafePickNode(Vector2(player->position.x + 1, player->position.y),
-                                //[this](Node* node) {
-                                    //node->SetContent(nullptr, '_');
-                                    //node->DrawContent(Vector2(0, 0));
-                                //});
-
-                            allEnemies.erase(allEnemies.begin() + i);
-
-                        }
-                    }
-                    //_enemyMutex.unlock();
-                }*/
+                
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
             });
             break;
         }

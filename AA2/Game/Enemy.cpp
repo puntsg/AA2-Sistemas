@@ -6,6 +6,7 @@ Enemy::Enemy(Vector2 pos, LeftCenterRight _xArea, UpCenterDown _yArea)
 	srand(time(NULL));
 	this->position = pos;
 	iCanMove = false;
+	health = 2;
 	timeForNextMove = (2 + rand() % 6) * 1000;
 
 	xArea = _xArea;
@@ -21,6 +22,21 @@ void Enemy::Draw(Vector2 offset)
 
 void Enemy::Kill()
 {
+}
+void Enemy::BeHurt()
+{
+	health--;
+}
+bool Enemy::IsDead()
+{
+	bool b;
+
+	health <= 0 ?
+		b = true
+		:
+		b = false;
+
+	return b;
 }
 
 void Enemy::WaitForNextActionLoop() {

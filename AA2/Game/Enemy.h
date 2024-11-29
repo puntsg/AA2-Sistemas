@@ -23,6 +23,8 @@ public:
     Enemy(Vector2 pos, LeftCenterRight _xArea, UpCenterDown _yArea);
     void Draw(Vector2 offset)override;
     void Kill();
+    void BeHurt();
+    bool IsDead();
     void Decode(Json::Value json);
     Json::Value Encode();
     static Enemy* FromJson(Json::Value json);
@@ -33,5 +35,6 @@ public:
     UpCenterDown yArea;
     int timeForNextMove;
     bool iCanMove;
+    int health;
 };
 
