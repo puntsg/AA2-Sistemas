@@ -50,22 +50,15 @@ Game::Game(){
         currentVerticalZone = VERTICAL_MAP_ZONES / 2;
         currentMap = maps[currentHorizontalZone][currentVerticalZone];
         player = new Player(Vector2(ZONE_WIDTH / 2, ZONE_HEIGHT / 2));
-        std::ifstream jsonReadFile = std::ifstream("Player.json", std::ifstream::binary);
-        if (!jsonReadFile.fail()) {
-            Json::Value ReadedJson;
-            jsonReadFile >> ReadedJson;
-            player = player->FromJson(ReadedJson, player->position);
-            jsonReadFile.close();
-        }
         currentMap->SafePickNode(player->position, [this](Node* node) {
             node->SetContent(player, 'J');
             node->DrawContent(player->position);
-            });
+         });
     }
-    else {
-        //Carregar
-    }
+    else 
+        LoadData();
 
+    
     is = new InputSystem();   
     //WASD movement
     InputSystem::KeyBinding* kb1 = is->KeyAddListener(K_D, [this]() {
@@ -225,10 +218,9 @@ void Game::SaveData()
     saveMutex.lock();
     for (int i = 0; i < HORIZONTAL_MAP_ZONES; i++) {
         for (int j = 0; j < VERTICAL_MAP_ZONES; j++) {
-            currentMap = maps[i][j];
             for (int k = 0; k < ZONE_WIDTH + 2; k++) {
                 for (int l = 0; l < ZONE_HEIGHT + 2; l++) {
-                    currentMap->SafePickNode(Vector2(k, l), [this,&mapString](Node* node) {
+                    maps[i][j]->SafePickNode(Vector2(k, l), [this, &mapString](Node* node) {
                         if(node->GetnodeContent() == nullptr)
                             mapString += " ";
                         else
@@ -249,6 +241,69 @@ void Game::SaveData()
     if (!jsonWriteFile.fail()) {
         jsonWriteFile << json;
         jsonWriteFile.close();
+    }
+}
+
+void Game::LoadData()
+{
+    std::string line;
+    std::ifstream MyReadFile("map.txt");
+    for (int i = 0; i < HORIZONTAL_MAP_ZONES; i++) {
+        for (int j = 0; j < VERTICAL_MAP_ZONES; j++) {
+            
+            for (int k = 0; k < ZONE_WIDTH + 2; k++) {
+                getline(MyReadFile, line);
+                char lineArray[ZONE_WIDTH + 2];
+                strcpy_s(lineArray, line.c_str());
+                for (int l = 0; l < ZONE_HEIGHT + 2; l++) {
+                    maps[i][j]->SafePickNode(Vector2(k, l), [this, i,j,k, l, lineArray](Node* node) {
+                        switch (lineArray[l])
+                        {
+                        case 'J':
+                            currentHorizontalZone = i;
+                            currentVerticalZone = j;
+                            LoadPlayer(Vector2(k,l));
+                            node->SetContent(player, 'J');
+                            break;
+                        case '#':
+                            node->SetContent(new Wall(), '#');
+                            break;
+                        case 'E':
+                            node->SetContent(new Enemy(Vector2(k,l),(LeftCenterRight)i,(UpCenterDown)j), 'E');
+                            break;
+                        case 'C':
+                            node->SetContent(new Chest(Vector2(k, l)), 'C');
+                            break;
+                        case 'P':
+                            node->SetContent(new Portal, 'P');
+                            break;
+                        case ' ':
+                            node->SetContent(nullptr, '_');
+                            break;
+                        default:
+                            break;
+                        }
+                     });
+                }
+                
+            }
+            getline(MyReadFile, line);
+        }
+    }
+    MyReadFile.close(); 
+    
+    currentMap = maps[currentHorizontalZone][currentVerticalZone];
+}
+
+void Game::LoadPlayer(Vector2 pos)
+{
+    player = new Player(pos);
+    std::ifstream jsonReadFile = std::ifstream("Player.json", std::ifstream::binary);
+    if (!jsonReadFile.fail()) {
+        Json::Value ReadedJson;
+        jsonReadFile >> ReadedJson;
+        player = player->FromJson(ReadedJson, player->position);
+        jsonReadFile.close();
     }
 }
 

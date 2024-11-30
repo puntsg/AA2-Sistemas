@@ -32,6 +32,7 @@ private :
 	void MoveEnemy(EDirection dir, Enemy* enemy);
 	void SaveData();
 	void LoadData();
+	void LoadPlayer(Vector2 pos);
 	bool canAttackMove = true;
 	int currentVerticalZone, currentHorizontalZone;
 	Timer* timer;
