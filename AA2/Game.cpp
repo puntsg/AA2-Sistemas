@@ -9,7 +9,7 @@ Game::Game(){
     srand(time(NULL));
     std::cout << 
         "1: load game\n" <<
-        "other: newgame\n" <<
+        "other: new game\n" <<
         "option: ";
     char option;
     std::cin >> option;
@@ -45,7 +45,7 @@ Game::Game(){
         }
     }
     
-    if (option == '1') {
+    if (option != '1') {
         currentHorizontalZone = HORIZONTAL_MAP_ZONES / 2;
         currentVerticalZone = VERTICAL_MAP_ZONES / 2;
         currentMap = maps[currentHorizontalZone][currentVerticalZone];
@@ -269,10 +269,12 @@ void Game::LoadData()
                             node->SetContent(new Wall(), '#');
                             break;
                         case 'E':
-                            node->SetContent(new Enemy(Vector2(k,l),(LeftCenterRight)i,(UpCenterDown)j), 'E');
+                            allEnemies.push_back(new Enemy(Vector2(k, l), (LeftCenterRight)i, (UpCenterDown)j));
+                            node->SetContent(allEnemies.back(), 'E');
                             break;
                         case 'C':
-                            node->SetContent(new Chest(Vector2(k, l)), 'C');
+                            allchests.push_back(new Chest(Vector2(k, l)));
+                            node->SetContent(allchests.back(), 'C');
                             break;
                         case 'P':
                             node->SetContent(new Portal, 'P');
