@@ -41,7 +41,9 @@ Game::Game(){
     currentHorizontalZone = HORIZONTAL_MAP_ZONES/2;
     currentVerticalZone = VERTICAL_MAP_ZONES / 2;
     currentMap = maps[currentHorizontalZone][currentVerticalZone];
-    //player = new Player(Vector2(ZONE_WIDTH/2,ZONE_HEIGHT/2));
+    
+    SetBegginingChestsAndEnemies();
+
     player = new Player(Vector2(3,4));
     currentMap->SafePickNode(player->position, [this](Node* node) {
         node->SetContent(player, 'J');
@@ -87,7 +89,7 @@ Game::Game(){
         });
 
     //Timer for spawing enemies or chests
-    timer->StartLoopTimer(1000, [this]() {
+    timer->StartLoopTimer(6000, [this]() {
         
         //Randomize enemy or chest generation and position
         int which = rand() % 11;
@@ -117,7 +119,7 @@ Game::Game(){
         }
         else {
         
-            Chest* newChest = new Chest(randomPos);
+            Chest* newChest = new Chest(randomPos, LeftCenterRightC(currentHorizontalZone), UpCenterDownC(currentVerticalZone));
             allchests.push_back(newChest);
 
             currentMap->SafePickNode(allchests.back()->position, [this](Node* node) {
@@ -129,9 +131,44 @@ Game::Game(){
         return true;
     });
 
-
+    
     
     PrintMapAndHud();
+}
+
+void Game::AddEnemy(Vector2 vec, int horizontal, int vertical) {
+    allEnemies.push_back(new Enemy(vec, LeftCenterRight(horizontal), UpCenterDown(vertical)));
+    
+    maps[horizontal][vertical]->SafePickNode(allEnemies.back()->position, [this](Node* node) {
+        node->SetContent(new Collectable(allEnemies.back()->position), 'E');
+        node->DrawContent(Vector2(0, 0));
+    });
+    
+}
+
+void Game::AddChest(Vector2 vec, int horizontal, int vertical) {
+    allchests.push_back(new Chest(vec, LeftCenterRightC(horizontal), UpCenterDownC(vertical)));
+    
+    maps[horizontal][vertical]->SafePickNode(allchests.back()->position, [this](Node* node) {
+        node->SetContent(new Collectable(allchests.back()->position), 'C');
+        node->DrawContent(Vector2(0, 0));
+    });
+}
+
+void Game::SetBegginingChestsAndEnemies() {
+    _enemyMutex.lock();
+    AddEnemy(Vector2(1, 1), 0, 1);
+    AddEnemy(Vector2(2, 2), 0, 1);
+    AddEnemy(Vector2(ZONE_WIDTH, 1), 2, 1);
+    AddEnemy(Vector2(ZONE_WIDTH-1, 2), 2, 1);
+    AddEnemy(Vector2(9, 1), 1, 1);
+    _enemyMutex.unlock();
+
+    AddChest(Vector2(ZONE_WIDTH / 2, ZONE_HEIGHT -3), 1, 0);
+    AddChest(Vector2(ZONE_WIDTH / 2, 3), 1, 2);    
+    AddChest(Vector2(4, 4), 1, 1);
+    AddChest(Vector2(8, 2), 1, 1);
+    AddChest(Vector2(4, ZONE_HEIGHT - 4), 1, 1);
 }
 
 void Game::CheckIfEnemiesDead() {
@@ -141,8 +178,8 @@ void Game::CheckIfEnemiesDead() {
     {
         if (allEnemies[i]->IsDead())
         {
-            currentMap->SafePickNode(allEnemies[i]->position, [this](Node* node) {
-                node->SetContent(nullptr, ' ');
+            currentMap->SafePickNode(allEnemies[i]->position, [this, i](Node* node) {
+                node->SetContent(new Collectable(allEnemies[i]->position), '?');
                 node->DrawContent(Vector2(0, 0));
             });
 
@@ -162,11 +199,9 @@ void Game::CheckIfChestsBroken() {
         if (allchests[i]->IsDestroyed())
         {        
             currentMap->SafePickNode(allchests[i]->position, [this, i](Node* node) {
-                node->SetContent(new Collectable(allchests[i]->position), '?'); // collectable fet, ara a agafar-lo amb player
+                node->SetContent(new Collectable(allchests[i]->position), '?');
                 node->DrawContent(Vector2(0, 0));
             });
-            
-            // omplir el node amb contingut objecte aleatori
 
             allchests[i] = nullptr;
             allchests.erase(allchests.begin() + i);
