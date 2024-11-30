@@ -3,7 +3,7 @@
 
 void Collectable::Draw(Vector2 offset)
 {
-	std::cout << "O";
+	std::cout << icon;
 }
 
 void Collectable::Collect(Player* player)

@@ -14,7 +14,7 @@ public:
     int potions;
     void Decode(Json::Value json);
     Json::Value Encode();
-    static Player* FromJson(Json::Value json);
+    static Player* FromJson(Json::Value& json, Vector2 playerPos);
     void Heal();
     void Hurt();
 };

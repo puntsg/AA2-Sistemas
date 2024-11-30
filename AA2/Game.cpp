@@ -3,6 +3,7 @@
 #include "Game/Portal.h"
 #include "Utils/ConsoleControl.h"
 #include <fstream>
+#include "3Nodes/ICodeable.h"
 
 Game::Game(){
     srand(time(NULL));
@@ -49,6 +50,13 @@ Game::Game(){
         currentVerticalZone = VERTICAL_MAP_ZONES / 2;
         currentMap = maps[currentHorizontalZone][currentVerticalZone];
         player = new Player(Vector2(ZONE_WIDTH / 2, ZONE_HEIGHT / 2));
+        std::ifstream jsonReadFile = std::ifstream("Player.json", std::ifstream::binary);
+        if (!jsonReadFile.fail()) {
+            Json::Value ReadedJson;
+            jsonReadFile >> ReadedJson;
+            player = player->FromJson(ReadedJson, player->position);
+            jsonReadFile.close();
+        }
         currentMap->SafePickNode(player->position, [this](Node* node) {
             node->SetContent(player, 'J');
             node->DrawContent(player->position);
@@ -84,6 +92,7 @@ Game::Game(){
             });
         }
     });
+
 
     //Timer for saving files
     timer->StartLoopTimer(5000, [this]() {
@@ -127,6 +136,7 @@ Game::Game(){
         return true;
     });
     PrintMapAndHud();
+
 }
 
 void Game::MoveEnemies() {
@@ -208,6 +218,7 @@ void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
 
 void Game::SaveData()
 {
+    //Save Map
     std::ofstream mapFile;
     mapFile.open("map.txt");
     std::string mapString = "";
@@ -232,6 +243,13 @@ void Game::SaveData()
    saveMutex.unlock();
     mapFile << mapString;
     mapFile.close();
+    //Save Player
+    Json::Value json = player->Encode();
+    std::ofstream jsonWriteFile = std::ofstream("Player.json", std::ifstream::binary);
+    if (!jsonWriteFile.fail()) {
+        jsonWriteFile << json;
+        jsonWriteFile.close();
+    }
 }
 
 void Game::GameUpdate()
@@ -244,7 +262,7 @@ void Game::PrintMapAndHud()
 {
     currentMap->UnsaveDraw();
     std::cout << "\nMonedas:" << player->coins << std::endl;
-    std::cout << "Vidas:" << player->potions << std::endl;
+    std::cout << "Vidas:" << player->lifes << std::endl;
     std::cout << "Pociones:" << player->potions << std::endl;
     std::cout << "Weapon";
 }

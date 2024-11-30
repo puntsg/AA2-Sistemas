@@ -75,6 +75,9 @@
     <ClCompile Include="Game\Collectable.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="3Nodes\ICodeable.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3Nodes\NodeMap.h">
@@ -168,6 +171,9 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="Game\Collectable.h">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="3Nodes\ICodeable.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>

@@ -15,17 +15,25 @@ void Player::Draw(Vector2 offset)
 
 void Player::Decode(Json::Value json)
 {
-	
+	lifes = json["lifes"].asInt();
+	potions = json["potions"].asInt();
+	coins = json["coins"].asInt();
 }
 
 Json::Value Player::Encode()
 {
-	return Json::Value();
+	Json::Value playerJson;
+	playerJson["coins"] = coins;
+	playerJson["lifes"] = lifes;
+	playerJson["potions"] = potions;
+	return playerJson;
 }
 
-Player* Player::FromJson(Json::Value json)
+Player* Player::FromJson(Json::Value& json,Vector2 playerPos)
 {
-	return nullptr;
+	Player* player = new Player(playerPos);
+	player->Decode(json);
+	return player;
 }
 
 void Player::Heal()

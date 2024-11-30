@@ -131,6 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="3Nodes\ICodeable.cpp" />
     <ClCompile Include="3Nodes\INodeContent.cpp" />
     <ClCompile Include="3Nodes\NodeMap.cpp" />
     <ClCompile Include="3Nodes\Nodes.cpp" />
@@ -153,6 +154,7 @@
     <ClCompile Include="Game\Weapon.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="3Nodes\ICodeable.h" />
     <ClInclude Include="3Nodes\INodeContent.h" />
     <ClInclude Include="3Nodes\NodeMap.h" />
     <ClInclude Include="3Nodes\Nodes.h" />

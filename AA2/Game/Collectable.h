@@ -4,6 +4,7 @@
 #include "Player.h"
 class Collectable : public INodeContent {
 public:
+	Collectable() { icon = 'O'; }
 	void Draw(Vector2 offset) override;
 	void Collect(Player* player);
 };
