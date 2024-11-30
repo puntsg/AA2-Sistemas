@@ -4,6 +4,9 @@
 #include "Utils/ConsoleControl.h"
 #include <fstream>
 #include "3Nodes/ICodeable.h"
+#include "Game/Collectable.h"
+
+#define MIN_DIST 2
 
 Game::Game(){
     srand(time(NULL));
@@ -44,7 +47,6 @@ Game::Game(){
             maps[i][j] = currentMap;
         }
     }
-    
     if (option != '1') {
         currentHorizontalZone = HORIZONTAL_MAP_ZONES / 2;
         currentVerticalZone = VERTICAL_MAP_ZONES / 2;
@@ -58,7 +60,6 @@ Game::Game(){
     else 
         LoadData();
 
-    
     is = new InputSystem();   
     //WASD movement
     InputSystem::KeyBinding* kb1 = is->KeyAddListener(K_D, [this]() {
@@ -93,19 +94,34 @@ Game::Game(){
         return true;
     });
 
-    //Timer for moving enemies 
+    //Timer for cheching on enemies 
     timer->StartLoopTimer(1000, [this]() {
+        CheckIfEnemiesDead();
+        CheckIfChestsBroken();
         MoveEnemies();
         return true;
         });
 
     //Timer for spawing enemies or chests
-    timer->StartLoopTimer(1000, [this]() {
-        int which = rand() % 11;
+    timer->StartLoopTimer(6000, [this]() {
         
+        //Randomize enemy or chest generation and position
+        int which = rand() % 11;
+        Vector2 randomPos;
+
+        do
+        {
+            randomPos.x = 1 + (rand() % (ZONE_WIDTH - 1));
+        } while (MIN_DIST > abs(player->position.x - randomPos.x));
+        do
+        {
+            randomPos.y = 1 + (rand() % (ZONE_HEIGHT - 1));
+        } while (MIN_DIST > abs(player->position.y - randomPos.y));
+
+        //Enemy or chest generation
         if (which > 5) {
             _enemyMutex.lock();
-            Enemy* newEnemy = new Enemy(Vector2(1 + (rand() % (ZONE_WIDTH - 1)), 1 + (rand() % (ZONE_HEIGHT - 1))),
+            Enemy* newEnemy = new Enemy(randomPos,
                 LeftCenterRight(currentHorizontalZone), UpCenterDown(currentVerticalZone));
             allEnemies.push_back(newEnemy);
 
@@ -117,7 +133,7 @@ Game::Game(){
         }
         else {
         
-            Chest* newChest = new Chest(Vector2(1 + (rand() % (ZONE_WIDTH -1)), 1 + (rand() % (ZONE_HEIGHT -1))));
+            Chest* newChest = new Chest(randomPos, LeftCenterRightC(currentHorizontalZone), UpCenterDownC(currentVerticalZone));
             allchests.push_back(newChest);
 
             currentMap->SafePickNode(allchests.back()->position, [this](Node* node) {
@@ -129,7 +145,82 @@ Game::Game(){
         return true;
     });
     PrintMapAndHud();
+}
 
+void Game::AddEnemy(Vector2 vec, int horizontal, int vertical) {
+    allEnemies.push_back(new Enemy(vec, LeftCenterRight(horizontal), UpCenterDown(vertical)));
+    
+    maps[horizontal][vertical]->SafePickNode(allEnemies.back()->position, [this](Node* node) {
+        node->SetContent(new Collectable(allEnemies.back()->position), 'E');
+        node->DrawContent(Vector2(0, 0));
+    });
+    
+}
+
+void Game::AddChest(Vector2 vec, int horizontal, int vertical) {
+    allchests.push_back(new Chest(vec, LeftCenterRightC(horizontal), UpCenterDownC(vertical)));
+    
+    maps[horizontal][vertical]->SafePickNode(allchests.back()->position, [this](Node* node) {
+        node->SetContent(new Collectable(allchests.back()->position), 'C');
+        node->DrawContent(Vector2(0, 0));
+    });
+}
+
+void Game::SetBegginingChestsAndEnemies() {
+    _enemyMutex.lock();
+    AddEnemy(Vector2(1, 1), 0, 1);
+    AddEnemy(Vector2(2, 2), 0, 1);
+    AddEnemy(Vector2(ZONE_WIDTH, 1), 2, 1);
+    AddEnemy(Vector2(ZONE_WIDTH-1, 2), 2, 1);
+    AddEnemy(Vector2(9, 1), 1, 1);
+    _enemyMutex.unlock();
+
+    AddChest(Vector2(ZONE_WIDTH / 2, ZONE_HEIGHT -3), 1, 0);
+    AddChest(Vector2(ZONE_WIDTH / 2, 3), 1, 2);    
+    AddChest(Vector2(4, 4), 1, 1);
+    AddChest(Vector2(8, 2), 1, 1);
+    AddChest(Vector2(4, ZONE_HEIGHT - 4), 1, 1);
+}
+
+void Game::CheckIfEnemiesDead() {
+    _enemyMutex.lock();
+
+    for (int i = 0; i < allEnemies.size();)
+    {
+        if (allEnemies[i]->IsDead())
+        {
+            currentMap->SafePickNode(allEnemies[i]->position, [this, i](Node* node) {
+                node->SetContent(new Collectable(allEnemies[i]->position), '?');
+                node->DrawContent(Vector2(0, 0));
+            });
+
+            allEnemies[i] = nullptr;
+            allEnemies.erase(allEnemies.begin() + i);
+        }
+        else
+            i++;
+    }
+    _enemyMutex.unlock();
+}
+
+void Game::CheckIfChestsBroken() {
+
+    for (int i = 0; i < allchests.size();)
+    {
+        if (allchests[i]->IsDestroyed())
+        {        
+            currentMap->SafePickNode(allchests[i]->position, [this, i](Node* node) {
+                node->SetContent(new Collectable(allchests[i]->position), '?');
+                node->DrawContent(Vector2(0, 0));
+            });
+
+            allchests[i] = nullptr;
+            allchests.erase(allchests.begin() + i);
+
+        }
+        else
+            i++;
+    }
 }
 
 void Game::MoveEnemies() {
@@ -153,7 +244,7 @@ void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
     if (int(enemy->xArea) == int(currentHorizontalZone) && int(enemy->yArea) == int(currentVerticalZone))
     {
         currentMap->SafePickNode(enemy->position, [this](Node* node) {
-            node->SetContent(nullptr, '_');
+            node->SetContent(nullptr, ' ');
             node->DrawContent(Vector2(0, 0));
         });
     }
@@ -273,14 +364,14 @@ void Game::LoadData()
                             node->SetContent(allEnemies.back(), 'E');
                             break;
                         case 'C':
-                            allchests.push_back(new Chest(Vector2(k, l)));
+                            allchests.push_back(new Chest(Vector2(k,l),(LeftCenterRightC)i,(UpCenterDownC)j));
                             node->SetContent(allchests.back(), 'C');
                             break;
                         case 'P':
                             node->SetContent(new Portal, 'P');
                             break;
                         case ' ':
-                            node->SetContent(nullptr, '_');
+                            node->SetContent(nullptr, ' ');
                             break;
                         default:
                             break;
@@ -355,17 +446,36 @@ void Game::MovePlayer(EDirection dir)
 
         canAttackMove = false;
         currentMap->SafePickNode(player->position, [this](Node* node) {
-            node->SetContent(nullptr,'_');
+            node->SetContent(nullptr,' ');
             node->DrawContent(Vector2(0, 0));
             });
         switch (dir)
         {
         case EDirection::UP:
-            currentMap->SafePickNode(Vector2(player->position.x, player->position.y -1), [this](Node* node) {
+            currentMap->SafePickNode(Vector2(player->position.x, player->position.y - 1), [this](Node* node) {
                 if (node->GetnodeContent() == nullptr)
-                    player->position.y--;
+                player->position.y--;
+            
                 else if (dynamic_cast<Portal*>(node->GetnodeContent()))
                     ChangeMapZone(EDirection::UP);
+
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent())) 
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+                
+                    player->position.y--;
+
+                    PrintMapAndHud();
+                }
+                    
             }); 
             
             break;
@@ -375,6 +485,23 @@ void Game::MovePlayer(EDirection dir)
                     player->position.y++;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent()))
                     ChangeMapZone(EDirection::DOWN);
+
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent())) 
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+
+                    player->position.y++;
+
+                    PrintMapAndHud();
+                }
             });
             
             break;
@@ -384,6 +511,23 @@ void Game::MovePlayer(EDirection dir)
                     player->position.x--;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent()))
                     ChangeMapZone(EDirection::LEFT);
+
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent()))
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+                
+                    player->position.x--;
+
+                    PrintMapAndHud();
+                }
             });
             break;
         case EDirection::RIGHT:
@@ -391,7 +535,24 @@ void Game::MovePlayer(EDirection dir)
                 if (node->GetnodeContent() == nullptr)
                     player->position.x++;
                 else if (dynamic_cast<Portal*>(node->GetnodeContent())) 
-                    ChangeMapZone(EDirection::RIGHT);
+                    ChangeMapZone(EDirection::RIGHT);   
+                
+                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent()))
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+                
+                    player->position.x++;
+
+                    PrintMapAndHud();
+                }
             });
             break;
         }

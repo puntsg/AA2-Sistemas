@@ -20,6 +20,24 @@ void Player::Decode(Json::Value json)
 	coins = json["coins"].asInt();
 }
 
+void Player::CollectMysteriousCollectable()
+{
+	int obj = rand() % 2;
+
+	switch (obj)
+	{
+	case 0:
+		coins++;
+		break;
+	case 1:
+		potions++;
+		break;
+	
+	default:
+		break;
+	}
+}
+
 Json::Value Player::Encode()
 {
 	Json::Value playerJson;

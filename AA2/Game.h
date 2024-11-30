@@ -24,11 +24,16 @@ public:
 	void GameUpdate();
 	void PrintMapAndHud();
 	std::vector<Enemy*> allEnemies;
-	std::vector<Character*> allchests;
+	std::vector<Chest*> allchests;
 private :
+	void AddChest(Vector2 vec, int horizontal, int vertical);
+	void AddEnemy(Vector2 vec, int horizontal, int vertical);
+	void SetBegginingChestsAndEnemies();
 	void ChangeMapZone(EDirection dir);
 	void MovePlayer(EDirection dir);
 	void MoveEnemies();
+	void CheckIfEnemiesDead();
+	void CheckIfChestsBroken();
 	void MoveEnemy(EDirection dir, Enemy* enemy);
 	void SaveData();
 	void LoadData();
