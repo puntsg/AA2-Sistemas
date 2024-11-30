@@ -4,7 +4,7 @@
 Node::Node(Vector2 position)
 {
 	_position = position;
-	icon = '_';
+	icon = ' ';
 }
 
 INodeContent* Node::GetnodeContent()

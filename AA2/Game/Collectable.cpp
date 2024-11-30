@@ -1,9 +1,13 @@
 #include "Collectable.h"
 #include <iostream>
 
+Collectable::Collectable(Vector2 _pos) {
+	position = _pos;	
+}
+
 void Collectable::Draw(Vector2 offset)
 {
-	std::cout << "O";
+	std::cout << 'O';
 }
 
 void Collectable::Collect(Player* player)

@@ -2,6 +2,7 @@
 #include "Game/DataSaver.h"
 #include "Game/Portal.h"
 #include "Utils/ConsoleControl.h"
+#include "Game/Collectable.h"
 
 #define MIN_DIST 2
 
@@ -80,6 +81,7 @@ Game::Game(){
     //Timer for cheching on enemies 
     timer->StartLoopTimer(1000, [this]() {
         CheckIfEnemiesDead();
+        CheckIfChestsBroken();
         MoveEnemies();
         return true;
         });
@@ -135,19 +137,44 @@ Game::Game(){
 void Game::CheckIfEnemiesDead() {
     _enemyMutex.lock();
 
-    for (int i = 0; i < allEnemies.size(); i++)
+    for (int i = 0; i < allEnemies.size();)
     {
         if (allEnemies[i]->IsDead())
         {
             currentMap->SafePickNode(allEnemies[i]->position, [this](Node* node) {
-                node->SetContent(nullptr, '_');
+                node->SetContent(nullptr, ' ');
                 node->DrawContent(Vector2(0, 0));
             });
 
+            allEnemies[i] = nullptr;
             allEnemies.erase(allEnemies.begin() + i);
         }
+        else
+            i++;
     }
     _enemyMutex.unlock();
+}
+
+void Game::CheckIfChestsBroken() {
+
+    for (int i = 0; i < allchests.size();)
+    {
+        if (allchests[i]->IsDestroyed())
+        {        
+            currentMap->SafePickNode(allchests[i]->position, [this, i](Node* node) {
+                node->SetContent(new Collectable(allchests[i]->position), '?'); // collectable fet, ara a agafar-lo amb player
+                node->DrawContent(Vector2(0, 0));
+            });
+            
+            // omplir el node amb contingut objecte aleatori
+
+            allchests[i] = nullptr;
+            allchests.erase(allchests.begin() + i);
+
+        }
+        else
+            i++;
+    }
 }
 
 void Game::MoveEnemies() {
@@ -171,7 +198,7 @@ void Game::MoveEnemy(EDirection dir, Enemy* enemy) {
     if (int(enemy->xArea) == int(currentHorizontalZone) && int(enemy->yArea) == int(currentVerticalZone))
     {
         currentMap->SafePickNode(enemy->position, [this](Node* node) {
-            node->SetContent(nullptr, '_');
+            node->SetContent(nullptr, ' ');
             node->DrawContent(Vector2(0, 0));
         });
     }
@@ -235,7 +262,7 @@ void Game::PrintMapAndHud()
 {
     currentMap->UnsaveDraw();
     std::cout << "\nMonedas:" << player->coins << std::endl;
-    std::cout << "Vidas:" << player->potions << std::endl;
+    std::cout << "Vidas:" << player->lifes << std::endl;
     std::cout << "Pociones:" << player->potions << std::endl;
     std::cout << "Weapon";
 }
@@ -271,7 +298,7 @@ void Game::MovePlayer(EDirection dir)
 
         canAttackMove = false;
         currentMap->SafePickNode(player->position, [this](Node* node) {
-            node->SetContent(nullptr, '_');
+            node->SetContent(nullptr, ' ');
             node->DrawContent(Vector2(0, 0));
             });
         switch (dir)
@@ -285,7 +312,22 @@ void Game::MovePlayer(EDirection dir)
                     ChangeMapZone(EDirection::UP);
 
                 else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
-                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();                                  
+                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent())) 
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+                
+                    player->position.y--;
+
+                    PrintMapAndHud();
+                }
+                    
             }); 
             
             break;
@@ -298,6 +340,20 @@ void Game::MovePlayer(EDirection dir)
 
                 else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
                     dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent())) 
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+
+                    player->position.y++;
+
+                    PrintMapAndHud();
+                }
             });
             
             break;
@@ -310,6 +366,20 @@ void Game::MovePlayer(EDirection dir)
 
                 else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
                     dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent()))
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+                
+                    player->position.x--;
+
+                    PrintMapAndHud();
+                }
             });
             break;
         case EDirection::RIGHT:
@@ -321,6 +391,20 @@ void Game::MovePlayer(EDirection dir)
                 
                 else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
                     dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
+
+                else if (dynamic_cast<Chest*>(node->GetnodeContent()))
+                    dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
+
+                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                    dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
+
+                    node->SetContent(nullptr, ' ');
+                    node->DrawContent(Vector2(0, 0));
+                
+                    player->position.x++;
+
+                    PrintMapAndHud();
+                }
             });
             break;
         }

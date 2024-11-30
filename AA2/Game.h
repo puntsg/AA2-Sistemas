@@ -24,12 +24,13 @@ public:
 	void GameUpdate();
 	void PrintMapAndHud();
 	std::vector<Enemy*> allEnemies;
-	std::vector<Character*> allchests;
+	std::vector<Chest*> allchests;
 private :
 	void ChangeMapZone(EDirection dir);
 	void MovePlayer(EDirection dir);
 	void MoveEnemies();
 	void CheckIfEnemiesDead();
+	void CheckIfChestsBroken();
 	void MoveEnemy(EDirection dir, Enemy* enemy);
 	bool canAttackMove = true;
 	int currentVerticalZone, currentHorizontalZone;
