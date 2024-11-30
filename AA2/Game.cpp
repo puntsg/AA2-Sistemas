@@ -5,6 +5,7 @@
 #include <fstream>
 #include "3Nodes/ICodeable.h"
 #include "Game/Collectable.h"
+#include "Game/Polearm.h"
 
 #define MIN_DIST 2
 
@@ -408,7 +409,7 @@ void Game::PrintMapAndHud()
     std::cout << "\nMonedas:" << player->coins << std::endl;
     std::cout << "Vidas:" << player->lifes << std::endl;
     std::cout << "Pociones:" << player->potions << std::endl;
-    std::cout << "Weapon";
+    std::cout << "Weapon:" << player->weapon->name ;
 }
 
 void Game::ChangeMapZone(EDirection dir)
@@ -438,9 +439,8 @@ void Game::ChangeMapZone(EDirection dir)
 
 void Game::MovePlayer(EDirection dir)
 {
+    
     if (canAttackMove) {
-
-        canAttackMove = false;
         currentMap->SafePickNode(player->position, [this](Node* node) {
             node->SetContent(nullptr,' ');
             node->DrawContent(Vector2(0, 0));
@@ -449,45 +449,44 @@ void Game::MovePlayer(EDirection dir)
         {
         case EDirection::UP:
             currentMap->SafePickNode(Vector2(player->position.x, player->position.y - 1), [this](Node* node) {
-                if (node->GetnodeContent() == nullptr)
-                player->position.y--;
-            
-                else if (dynamic_cast<Portal*>(node->GetnodeContent()))
+                if (node->GetnodeContent() == nullptr) {
+                   /* if (static_cast<Polearm*>(player->weapon)) {
+                        currentMap->SafePickNode(Vector2(player->position.x, player->position.y - 2), [this](Node* node2) {
+                            if (dynamic_cast<Enemy*>(node2->GetnodeContent())) {
+                                dynamic_cast<Enemy*>(node2->GetnodeContent())->BeHurt();
+                                canAttackMove = false;
+                            }
+                         });
+                    }
+                    if(canAttackMove)*/
+                    player->position.y--;
+                }else if (dynamic_cast<Portal*>(node->GetnodeContent())){
                     ChangeMapZone(EDirection::UP);
-
-                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
-                    dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
-
-                else if (dynamic_cast<Chest*>(node->GetnodeContent())) 
+                }else if (dynamic_cast<Enemy*>(node->GetnodeContent())) {
+                    
+                }else if (dynamic_cast<Chest*>(node->GetnodeContent())) {
                     dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
-
-                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                }else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
                     dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
 
                     node->SetContent(nullptr, ' ');
                     node->DrawContent(Vector2(0, 0));
                     
                     player->position.y--;
-
                 }
-                    
             }); 
-            
             break;
         case EDirection::DOWN:
             currentMap->SafePickNode(Vector2(player->position.x, player->position.y + 1), [this](Node* node) {
-                if (node->GetnodeContent() == nullptr)
+                if (node->GetnodeContent() == nullptr) {
                     player->position.y++;
-                else if (dynamic_cast<Portal*>(node->GetnodeContent()))
+                }else if (dynamic_cast<Portal*>(node->GetnodeContent())){
                     ChangeMapZone(EDirection::DOWN);
-
-                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                }else if (dynamic_cast<Enemy*>(node->GetnodeContent())) {
                     dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
-
-                else if (dynamic_cast<Chest*>(node->GetnodeContent())) 
+                }else if (dynamic_cast<Chest*>(node->GetnodeContent())) {
                     dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
-
-                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                }else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
                     dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
 
                     node->SetContent(nullptr, ' ');
@@ -496,57 +495,49 @@ void Game::MovePlayer(EDirection dir)
                     player->position.y++;
                 }
             });
-            
             break;
         case EDirection::LEFT:
             currentMap->SafePickNode(Vector2(player->position.x - 1, player->position.y), [this](Node* node) {
-                if (node->GetnodeContent() == nullptr)
+                if (node->GetnodeContent() == nullptr){
                     player->position.x--;
-                else if (dynamic_cast<Portal*>(node->GetnodeContent()))
+                }else if (dynamic_cast<Portal*>(node->GetnodeContent())){
                     ChangeMapZone(EDirection::LEFT);
-
-                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                }else if (dynamic_cast<Enemy*>(node->GetnodeContent())){
                     dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
-
-                else if (dynamic_cast<Chest*>(node->GetnodeContent()))
+                }else if (dynamic_cast<Chest*>(node->GetnodeContent())){
                     dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
-
-                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                }else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
                     dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
 
                     node->SetContent(nullptr, ' ');
                     node->DrawContent(Vector2(0, 0));
                 
                     player->position.x--;
-
                 }
             });
             break;
         case EDirection::RIGHT:
             currentMap->SafePickNode(Vector2(player->position.x + 1, player->position.y), [this](Node* node) {
-                if (node->GetnodeContent() == nullptr)
+                if (node->GetnodeContent() == nullptr){
                     player->position.x++;
-                else if (dynamic_cast<Portal*>(node->GetnodeContent())) 
+                }else if (dynamic_cast<Portal*>(node->GetnodeContent())){
                     ChangeMapZone(EDirection::RIGHT);   
-                
-                else if (dynamic_cast<Enemy*>(node->GetnodeContent()))
+                }else if (dynamic_cast<Enemy*>(node->GetnodeContent())){
                     dynamic_cast<Enemy*>(node->GetnodeContent())->BeHurt();
-
-                else if (dynamic_cast<Chest*>(node->GetnodeContent()))
+                }else if (dynamic_cast<Chest*>(node->GetnodeContent())){
                     dynamic_cast<Chest*>(node->GetnodeContent())->Destroy();
-
-                else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
+                }else if (dynamic_cast<Collectable*>(node->GetnodeContent())) {
                     dynamic_cast<Collectable*>(node->GetnodeContent())->Collect(player);
 
                     node->SetContent(nullptr, ' ');
                     node->DrawContent(Vector2(0, 0));
                 
                     player->position.x++;
-
                 }
             });
             break;
         }
+        canAttackMove = false;
         currentMap->SafePickNode(player->position, [this](Node* node) {
             node->SetContent(player, player->icon);
             node->DrawContent(Vector2(0, 0));

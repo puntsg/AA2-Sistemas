@@ -3,5 +3,7 @@
 class Sword :
     public Weapon
 {
+public:
+    Sword() { name = "sword"; }
 };
 

@@ -1,12 +1,15 @@
 #include "Player.h"
 #include <iostream>
 #include "../Utils/ConsoleControl.h"
+#include "Sword.h"
+#include "Polearm.h"
 Player::Player(Vector2 pos) {
 	position = pos;
 	coins = 0;
 	lifes = 0;
 	potions = 0;
 	icon = 'J';
+	weapon = new Sword();
 }
 
 void Player::Draw(Vector2 offset)
@@ -19,24 +22,10 @@ void Player::Decode(Json::Value json)
 	lifes = json["lifes"].asInt();
 	potions = json["potions"].asInt();
 	coins = json["coins"].asInt();
-}
-
-void Player::CollectMysteriousCollectable()
-{
-	int obj = rand() % 2;
-
-	switch (obj)
-	{
-	case 0:
-		coins++;
-		break;
-	case 1:
-		potions++;
-		break;
-	
-	default:
-		break;
-	}
+	if (json["weapon"].asString() == "sword")
+		weapon = new Sword();
+	else
+		weapon = new Polearm();
 }
 
 Json::Value Player::Encode()
@@ -45,6 +34,7 @@ Json::Value Player::Encode()
 	playerJson["coins"] = coins;
 	playerJson["lifes"] = lifes;
 	playerJson["potions"] = potions;
+	playerJson["weapon"] = weapon->name;
 	return playerJson;
 }
 

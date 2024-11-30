@@ -3,5 +3,7 @@
 class Polearm :
     public Weapon
 {
+public:
+    Polearm() { name = "polearm"; }
 };
 

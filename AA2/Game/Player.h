@@ -13,7 +13,6 @@ public:
     int lifes;
     int potions;
     void Decode(Json::Value json);
-    void CollectMysteriousCollectable();
     Json::Value Encode();
     static Player* FromJson(Json::Value& json, Vector2 playerPos);
     void Heal();

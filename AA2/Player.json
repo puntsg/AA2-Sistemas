@@ -1,5 +1,6 @@
 {
 	"coins" : 3,
-	"lifes" : 1,
-	"potions" : 0
+	"lifes" : 0,
+	"potions" : 2,
+	"weapon" : "sword"
 }
