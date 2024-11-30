@@ -75,16 +75,12 @@ Game::Game(){
         MovePlayer(EDirection::UP);
     });
 
+    //set premade enemies and chests
+    SetBegginingChestsAndEnemies();
+
     //Healing
     InputSystem::KeyBinding* kb5 = is->KeyAddListener(K_0, [this]() {
-        if ((player->potions > 0) && canAttackMove) {
-            player->potions--;
-            player->lifes++;
-            canAttackMove = false;
-            timer->StartTimer(1000, [this]() {
-                canAttackMove = true;
-            });
-        }
+        player->Heal();
     });
 
 
@@ -190,7 +186,7 @@ void Game::CheckIfEnemiesDead() {
         if (allEnemies[i]->IsDead())
         {
             currentMap->SafePickNode(allEnemies[i]->position, [this, i](Node* node) {
-                node->SetContent(new Collectable(allEnemies[i]->position), '?');
+                node->SetContent(new Collectable(allEnemies[i]->position), 'O');
                 node->DrawContent(Vector2(0, 0));
             });
 
@@ -210,7 +206,7 @@ void Game::CheckIfChestsBroken() {
         if (allchests[i]->IsDestroyed())
         {        
             currentMap->SafePickNode(allchests[i]->position, [this, i](Node* node) {
-                node->SetContent(new Collectable(allchests[i]->position), '?');
+                node->SetContent(new Collectable(allchests[i]->position), 'O');
                 node->DrawContent(Vector2(0, 0));
             });
 
@@ -470,10 +466,9 @@ void Game::MovePlayer(EDirection dir)
 
                     node->SetContent(nullptr, ' ');
                     node->DrawContent(Vector2(0, 0));
-                
+                    
                     player->position.y--;
 
-                    PrintMapAndHud();
                 }
                     
             }); 
@@ -499,8 +494,6 @@ void Game::MovePlayer(EDirection dir)
                     node->DrawContent(Vector2(0, 0));
 
                     player->position.y++;
-
-                    PrintMapAndHud();
                 }
             });
             
@@ -526,7 +519,6 @@ void Game::MovePlayer(EDirection dir)
                 
                     player->position.x--;
 
-                    PrintMapAndHud();
                 }
             });
             break;
@@ -551,7 +543,6 @@ void Game::MovePlayer(EDirection dir)
                 
                     player->position.x++;
 
-                    PrintMapAndHud();
                 }
             });
             break;

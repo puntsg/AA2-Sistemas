@@ -1,5 +1,6 @@
 #include "Player.h"
 #include <iostream>
+#include "../Utils/ConsoleControl.h"
 Player::Player(Vector2 pos) {
 	position = pos;
 	coins = 0;
@@ -59,6 +60,10 @@ void Player::Heal()
 	if (potions > 0 && lifes <= 2) {
 		this->lifes++;
 		this->potions--;
+		CC::SetPosition(6, 12);
+		std::cout << lifes;
+		CC::SetPosition(9, 13);
+		std::cout << potions;
 	}
 }
 
